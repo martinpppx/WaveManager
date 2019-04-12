@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,12 +14,40 @@ public enum WaveStatus
     Lose = 6
 }
 
+
+[Serializable]
+public struct Enemy
+{
+    public GameObject mobOject;
+    public int EnemyID;
+}
+
+[Serializable]
+public struct EnemyManager
+{
+    public int EnemyID;
+    public float Rate;
+    public int Count;
+}
+
+[Serializable]
+public struct Wave
+{
+    public string WaveName;
+    public EnemyManager[] Enemies;
+}
+
 public class WaveManager : MonoBehaviour
 {
     public int Index = 0;
 
     public bool DontDestroy = true;
-
+    public bool RunInBackground = true;
+	
+	
+	[SerializeField]
+    private Enemy[] Enemies;
+	
 	private WaveStatus status = WaveStatus.Init;
 
     public WaveStatus Status { get { return status; } set { status = value; } }
@@ -44,7 +73,7 @@ public class WaveManager : MonoBehaviour
         switch ((int)status)
         {
             case 0:
-
+                Init();
                 break;
             case 1:
 
@@ -65,5 +94,28 @@ public class WaveManager : MonoBehaviour
 
                 break;
         }
+    }
+	
+	private void Init()
+    {
+        OnInitializedWave();
+
+        if (Enemies.Length < 1)
+        {
+            Debug.LogError("You must set the Enemies in the manager");
+            return;
+        }
+    }
+
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public virtual void OnInitializedWave()
+    {
+
     }
 }
