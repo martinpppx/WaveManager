@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +14,6 @@ public enum WaveStatus
     Win = 5,
     Lose = 6
 }
-
 
 [Serializable]
 public struct Enemy
@@ -43,16 +43,18 @@ public class WaveManager : MonoBehaviour
 
     public bool DontDestroy = true;
     public bool RunInBackground = true;
-	
-	
-	[SerializeField]
+
+    [SerializeField]
     private Enemy[] Enemies;
-	
-	private WaveStatus status = WaveStatus.Init;
+
+    [SerializeField]
+    private Wave[] Waves;
+
+    public static WaveManager Manager { get; private set; }
+
+    private WaveStatus status = WaveStatus.Init;
 
     public WaveStatus Status { get { return status; } set { status = value; } }
-	
-    public static WaveManager Manager { get; private set; }
 
 
     void Start()
@@ -66,6 +68,22 @@ public class WaveManager : MonoBehaviour
     void Update()
     {
         InitSystem();
+    }
+
+    void OnValidate()
+    {
+#if UNITY_EDITOR
+        if (Enemies.Length < 1)
+        {
+            Debug.LogError("You must set the Enemies in the manager");
+        }
+
+        if (Waves.Length < 0)
+        {
+            Debug.LogError("You must set the Waves in the manager");
+        }
+
+#endif
     }
 
     void InitSystem()
@@ -95,16 +113,16 @@ public class WaveManager : MonoBehaviour
                 break;
         }
     }
-	
-	private void Init()
+
+    private void Init()
     {
         OnInitializedWave();
 
-        if (Enemies.Length < 1)
-        {
-            Debug.LogError("You must set the Enemies in the manager");
-            return;
-        }
+        if (Enemies.Length < 1) return;     
+        if (Waves.Length < 0) return;
+        
+
+        
     }
 
 
