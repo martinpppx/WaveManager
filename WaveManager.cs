@@ -55,7 +55,7 @@ public class WaveManager : MonoBehaviour
     public static WaveManager Manager { get; private set; }
 
 
-        void Start()
+    void Start()
     {
         if (DontDestroy)
             DontDestroyOnLoad(this);
