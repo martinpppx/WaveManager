@@ -43,12 +43,18 @@ public class WaveManager : MonoBehaviour
 
     public bool DontDestroy = true;
     public bool RunInBackground = true;
-
+	
+	public bool WaitForOtherPlayers = false;
+	public int MinPlayers = 3;
+	
     [SerializeField]
     private Enemy[] Enemies;
 
     [SerializeField]
     private Wave[] Waves;
+	
+	public string EnemyTag = "Enemy";
+	public string PlayerTag = "Player";
 
     public static WaveManager Manager { get; private set; }
 
@@ -121,12 +127,29 @@ public class WaveManager : MonoBehaviour
         if (Enemies.Length < 1) return;     
         if (Waves.Length < 0) return;
         
-
-        
+		if (WaitForOtherPlayers){
+			GameObject[] players = AllPlayers();
+			
+			if (players.Length >= MinPlayers){
+				status = WaveStatus.Start;
+			}
+			
+		}else{
+			
+			status = WaveStatus.Start;
+		}        
     }
-
-
-
+	
+	
+	public static GameObject[] AllEnemies()
+    {
+        return (GameObject[])GameObject.FindGameObjectsWithTag(EnemyTag);
+    }
+    public static GameObject[] AllPlayers()
+    {
+        return (GameObject[])GameObject.FindGameObjectsWithTag("Player");
+    }
+	
 
 
     /// <summary>
