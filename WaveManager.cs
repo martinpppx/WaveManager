@@ -150,9 +150,9 @@ public class WaveManager : MonoBehaviour
 	
     public static GameObject[] AllPlayers()
     {
-        return (GameObject[])GameObject.FindGameObjectsWithTag("Player");
+        return (GameObject[])GameObject.FindGameObjectsWithTag(PlayerTag);
     }
-	public static GameObject[] AllEnemies()
+    public static GameObject[] AllEnemies()
     {
         return (GameObject[])GameObject.FindGameObjectsWithTag(EnemyTag);
     }
