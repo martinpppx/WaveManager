@@ -48,11 +48,10 @@ public class WaveManager : MonoBehaviour
     public bool RunInBackground = true;
 	
     [Header("Game Settings")]
-	public bool WaitForOtherPlayers = false;
-	public int MinPlayers = 3;
     public string EnemyTag = "Enemy";
     public string PlayerTag = "Player";
-
+    public bool WaitForOtherPlayers = false;
+    public int MinPlayers = 3;
 
     [SerializeField]
     private Enemy[] Enemies;
@@ -149,15 +148,14 @@ public class WaveManager : MonoBehaviour
         OnStartGame();
     }
 	
-	public static GameObject[] AllEnemies()
-    {
-        return (GameObject[])GameObject.FindGameObjectsWithTag(EnemyTag);
-    }
     public static GameObject[] AllPlayers()
     {
         return (GameObject[])GameObject.FindGameObjectsWithTag("Player");
     }
-	
+	public static GameObject[] AllEnemies()
+    {
+        return (GameObject[])GameObject.FindGameObjectsWithTag(EnemyTag);
+    }
 
 
     /// <summary>
