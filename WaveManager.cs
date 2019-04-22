@@ -39,22 +39,26 @@ public struct Wave
 
 public class WaveManager : MonoBehaviour
 {
+
+    [HideInInspector]
     public int Index = 0;
 
+    [Header("Manager")]
     public bool DontDestroy = true;
     public bool RunInBackground = true;
 	
+    [Header("Game Settings")]
 	public bool WaitForOtherPlayers = false;
 	public int MinPlayers = 3;
-	
+    public string EnemyTag = "Enemy";
+    public string PlayerTag = "Player";
+
+
     [SerializeField]
     private Enemy[] Enemies;
 
     [SerializeField]
     private Wave[] Waves;
-	
-	public string EnemyTag = "Enemy";
-	public string PlayerTag = "Player";
 
     public static WaveManager Manager { get; private set; }
 
@@ -100,7 +104,7 @@ public class WaveManager : MonoBehaviour
                 Init();
                 break;
             case 1:
-
+                StartGame();
                 break;
             case 2:
 
@@ -139,7 +143,11 @@ public class WaveManager : MonoBehaviour
 			status = WaveStatus.Start;
 		}        
     }
-	
+
+    private void StartGame()
+    {
+        OnStartGame();
+    }
 	
 	public static GameObject[] AllEnemies()
     {
@@ -156,6 +164,11 @@ public class WaveManager : MonoBehaviour
     /// 
     /// </summary>
     public virtual void OnInitializedWave()
+    {
+
+    }
+
+    public virtual void OnStartGame()
     {
 
     }
