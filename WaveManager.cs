@@ -11,7 +11,6 @@ public enum WaveStatus : int
     Update,
     Spawn,
     Wait,
-    Finish,
     Win,
     Lose,
 }
@@ -83,7 +82,7 @@ public class WaveManager : MonoBehaviour
                 StartWave();
                 break;
             case WaveStatus.Update:
-
+                UpdateGame();
                 break;
             case WaveStatus.Spawn:
                 StartCoroutine(SpawnAll(Waves[Index]));
@@ -91,14 +90,11 @@ public class WaveManager : MonoBehaviour
             case WaveStatus.Wait:
                 //
                 break;
-            case WaveStatus.Finish:
-
-                break;
             case WaveStatus.Win:
-
+                Won();
                 break;
             case WaveStatus.Lose:
-
+                End();
                 break;
         }
     }
@@ -134,7 +130,9 @@ public class WaveManager : MonoBehaviour
         OnStartWave();
 
         float _TimeToStart = (WaveCountdown + TimeToStart) - Time.time;
-        Debug.Log(Mathf.Ceil(_TimeToStart).ToString());
+
+        ///
+        Debug.Log(Mathf.Ceil(_TimeToStart).ToString()); //u can use this anywhere you want    
 
         if (Time.time > TimeToStart + WaveCountdown)
         {
@@ -152,6 +150,7 @@ public class WaveManager : MonoBehaviour
             {
                 EnemyManager panel = mode.Enemies[b];
                 RequestSpawnMob(panel);
+                OnMobSpawned(panel.Enemy);
                 yield return new WaitForSeconds(1f / mode.Enemies[b].Rate);
             }
         }
@@ -169,6 +168,51 @@ public class WaveManager : MonoBehaviour
         return mob;
     }
 
+    private void UpdateGame()
+    {
+        if (AllPlayers().Length == 0)
+        {
+            status = WaveStatus.Lose;
+        }else if (AllEnemies().Length == 0)
+        {
+            NextWave();
+        }
+    }
+
+    private void NextWave()
+    {
+        status = WaveStatus.Wait;
+
+        if (Index + 1 >= Waves.Length)
+        {
+            status = WaveStatus.Win;
+            return;
+        }
+
+        Index++;
+        WaveCountdown = Time.time;
+
+        SpawnDeathPlayers(); 
+
+        status = WaveStatus.Spawn; //or Start, maybe u can want to give them more times to prepare 
+    }
+    
+    private void Won()
+    {
+        WonTheGame();
+    }
+
+    private void End()
+    {
+        EndTheGame();
+    }
+
+
+
+    private void SpawnDeathPlayers()
+    {
+        OnSpawnDeathPlayers();
+    }
 
     public static GameObject[] AllEnemies()
     {
@@ -190,6 +234,26 @@ public class WaveManager : MonoBehaviour
     }
 
     public virtual void OnStartWave()
+    {
+
+    }
+
+    public virtual void OnMobSpawned(GameObject Mob)
+    {
+        //
+    }
+
+    public virtual void OnSpawnDeathPlayers()
+    {
+        //todo:
+    }
+
+    public virtual void WonTheGame()
+    {
+
+    }
+
+    public virtual void EndTheGame()
     {
 
     }
