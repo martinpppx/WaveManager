@@ -4,27 +4,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum WaveStatus
+public enum WaveStatus : int
 {
     Init = 0,
-    Start = 1,
-    Break = 2,
-    Update = 3,
-    Finish = 4,
-    Win = 5,
-    Lose = 6
-}
-
-[Serializable]
-public struct Enemy
-{
-    public GameObject mobOject;
-    public int EnemyID;
+    Start,
+    Update,
+    Spawn,
+    Wait,
+    Finish,
+    Win,
+    Lose,
 }
 
 [Serializable]
 public struct EnemyManager
 {
+    public GameObject Enemy;
     public int EnemyID;
     public float Rate;
     public int Count;
@@ -39,25 +34,21 @@ public struct Wave
 
 public class WaveManager : MonoBehaviour
 {
-
-    [HideInInspector]
     public int Index = 0;
 
-    [Header("Manager")]
+    public float TimeToStart = 30f;
+
     public bool DontDestroy = true;
     public bool RunInBackground = true;
-	
-    [Header("Game Settings")]
-    public string EnemyTag = "Enemy";
-    public string PlayerTag = "Player";
+
     public bool WaitForOtherPlayers = false;
     public int MinPlayers = 3;
 
     [SerializeField]
-    private Enemy[] Enemies;
-
-    [SerializeField]
     private Wave[] Waves;
+
+    public string EnemyTag = "Enemy";
+    public string PlayerTag = "Player";
 
     public static WaveManager Manager { get; private set; }
 
@@ -65,6 +56,8 @@ public class WaveManager : MonoBehaviour
 
     public WaveStatus Status { get { return status; } set { status = value; } }
 
+
+    private float WaveCountdown = 0f;
 
     void Start()
     {
@@ -79,45 +72,32 @@ public class WaveManager : MonoBehaviour
         InitSystem();
     }
 
-    void OnValidate()
-    {
-#if UNITY_EDITOR
-        if (Enemies.Length < 1)
-        {
-            Debug.LogError("You must set the Enemies in the manager");
-        }
-
-        if (Waves.Length < 0)
-        {
-            Debug.LogError("You must set the Waves in the manager");
-        }
-
-#endif
-    }
-
     void InitSystem()
     {
-        switch ((int)status)
+        switch (status)
         {
-            case 0:
+            case WaveStatus.Init:
                 Init();
                 break;
-            case 1:
-                StartGame();
+            case WaveStatus.Start:
+                StartWave();
                 break;
-            case 2:
+            case WaveStatus.Update:
 
                 break;
-            case 3:
+            case WaveStatus.Spawn:
+                StartCoroutine(SpawnAll(Waves[Index]));
+                break;
+            case WaveStatus.Wait:
+                //
+                break;
+            case WaveStatus.Finish:
 
                 break;
-            case 4:
+            case WaveStatus.Win:
 
                 break;
-            case 5:
-
-                break;
-            case 6:
+            case WaveStatus.Lose:
 
                 break;
         }
@@ -127,35 +107,78 @@ public class WaveManager : MonoBehaviour
     {
         OnInitializedWave();
 
-        if (Enemies.Length < 1) return;     
-        if (Waves.Length < 0) return;
-        
-		if (WaitForOtherPlayers){
-			GameObject[] players = AllPlayers();
-			
-			if (players.Length >= MinPlayers){
-				status = WaveStatus.Start;
-			}
-			
-		}else{
-			
-			status = WaveStatus.Start;
-		}        
+        if (Waves.Length < 0) {
+            Debug.LogError("You must set the Waves in the manager");
+            return;
+        }
+
+        if (WaitForOtherPlayers)
+        {
+            GameObject[] players = AllPlayers();
+
+            if (players.Length >= MinPlayers)
+            {
+                status = WaveStatus.Start;
+                WaveCountdown = Time.time;
+            }
+        }
+        else
+        {
+            WaveCountdown = Time.time;
+            status = WaveStatus.Start;
+        }
     }
 
-    private void StartGame()
+    private void StartWave()
     {
-        OnStartGame();
+        OnStartWave();
+
+        float _TimeToStart = (WaveCountdown + TimeToStart) - Time.time;
+        Debug.Log(Mathf.Ceil(_TimeToStart).ToString());
+
+        if (Time.time > TimeToStart + WaveCountdown)
+        {
+            status = WaveStatus.Spawn;
+        }
     }
-	
-    public static GameObject[] AllPlayers()
+
+    private IEnumerator SpawnAll(Wave mode)
     {
-        return (GameObject[])GameObject.FindGameObjectsWithTag(PlayerTag);
+        status = WaveStatus.Wait;
+
+        for (int b = 0; b < mode.Enemies.Length; b++)
+        {
+            for (int i = 0; i < mode.Enemies[b].Count; i++)
+            {
+                EnemyManager panel = mode.Enemies[b];
+                RequestSpawnMob(panel);
+                yield return new WaitForSeconds(1f / mode.Enemies[b].Rate);
+            }
+        }
+
+        status = WaveStatus.Update;
+
+        yield break;
     }
+
+    private GameObject RequestSpawnMob(EnemyManager mode, Vector3 Pos = Vector3.Zero, Quaternion Rot = Quaternion.identity)
+    {
+        GameObject mob = Instantiate(mode.Enemy, Pos, Rot);
+
+        //do something like mob.getComponent<Health>().AddHealth(500) 
+        return mob;
+    }
+
+
     public static GameObject[] AllEnemies()
     {
         return (GameObject[])GameObject.FindGameObjectsWithTag(EnemyTag);
     }
+    public static GameObject[] AllPlayers()
+    {
+        return (GameObject[])GameObject.FindGameObjectsWithTag(PlayerTag);
+    }
+	
 
 
     /// <summary>
@@ -166,7 +189,7 @@ public class WaveManager : MonoBehaviour
 
     }
 
-    public virtual void OnStartGame()
+    public virtual void OnStartWave()
     {
 
     }
