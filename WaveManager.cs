@@ -132,7 +132,7 @@ public class WaveManager : MonoBehaviour
         float _TimeToStart = (WaveCountdown + TimeToStart) - Time.time;
 
         ///
-        Debug.Log(Mathf.Ceil(_TimeToStart).ToString()); //u can use this anywhere you want    
+        Debug.Log(Mathf.Ceil(_TimeToStart).ToString());    
 
         if (Time.time > TimeToStart + WaveCountdown)
         {
@@ -194,7 +194,7 @@ public class WaveManager : MonoBehaviour
 
         SpawnDeathPlayers(); 
 
-        status = WaveStatus.Spawn; //or Start, maybe u can want to give them more times to prepare 
+        status = WaveStatus.Spawn; //?
     }
     
     private void Won()
